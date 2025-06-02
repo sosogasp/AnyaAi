@@ -1,0 +1,60 @@
+/* style.css */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  padding: 20px;
+}
+
+h1, h2 {
+  color: #333;
+  text-align: center;
+}
+
+form {
+  max-width: 800px;
+  margin: 0 auto 20px auto;
+}
+
+input[type="text"] {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Agrupamento dos botões lado a lado */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  background-color: #007BFF;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+pre#historico {
+  background-color: white;
+  border: 1px solid #ccc;
+  padding: 15px;
+  height: 300px;
+  overflow-y: scroll;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: sans-serif;  /* Troca monospace por sans-serif */
+  white-space: pre-line;    /* Agora ignora múltiplos espaços e mantém quebras de linha */
+}
+

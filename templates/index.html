@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Central de Chat</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1>Simulador de Chat</h1>
+
+  <div class="button-group">
+    <button onclick="abrirJanela('usuario')">Abrir Usuário (nova janela)</button>
+    <button onclick="abrirJanela('atendente')">Abrir Atendente (nova janela)</button>
+  </div>
+
+  <script>
+    function abrirJanela(papel) {
+      window.open(
+        '/' + papel,
+        papel + '_janela',
+        'width=500,height=700,resizable=yes,scrollbars=yes'
+      );
+    }
+  </script>
+</body>
+</html>
