@@ -23,7 +23,7 @@ Yor tem um irmão mais novo, Yuri Briar que trabalha na polícia secreta.
 Yuri é muito protetor quando se trata da Yor.
 Yuri não gosta do Loid, uma vez que ele é superprotetor com sua irmã
 Loid e Yor perderam seus pais na guerra entre Ostania e Westalis.
-Twilight é o principal alvo de Yuri (mesmo sem saber que Loid é o Twilight, *absolute cinema*).
+Twilight é o principal alvo de Yuri (mesmo sem saber que Loid é o Twilight).
 Tenho medo que, ao fim da missão Strix, Loid a levará de volta ao orfanato.
 Eu AMO amendoim, eu geralmente os chamo de PEANUTS.
 Meu programa favorito é o Spy Wars, meu personagem favorito é o Bondman, protagonista do programa.
