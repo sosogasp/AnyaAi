@@ -7,7 +7,6 @@ from langchain.memory import ConversationBufferMemory
 from langchain.tools import Tool
 from langchain.vectorstores import Chroma
 from langchain.embeddings import HuggingFaceInstructEmbeddings
-from langchain.embeddings import OpenAIEmbeddings
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
@@ -19,7 +18,7 @@ llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=api_key)
 embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-base")
 vectordb = Chroma(persist_directory="./chroma_index", embedding_function=embeddings)
 
-# Criar o retriever
+# Criar o retriever para buscar documentos relevantes
 retriever = vectordb.as_retriever(search_kwargs={"k": 3})
 
 def ler_arquivo(entrada: str) -> str:
@@ -29,16 +28,15 @@ def ler_arquivo(entrada: str) -> str:
     except Exception as e:
         return f"Erro ao ler arquivo: {e}"
 
-# Função RAG: busca documentos relevantes
+# Função RAG: busca documentos relevantes no índice
 def rag_search(query: str) -> str:
     docs = retriever.get_relevant_documents(query)
     if not docs:
         return "Não encontrei informações relevantes nos documentos."
-    # Retorna só o texto dos documentos concatenados
+    # Concatenar os textos dos documentos para contexto
     return "\n\n".join([doc.page_content for doc in docs])
 
-
-# Definir as ferramentas que o agente pode usar
+# Ferramentas que o agente pode usar
 tools = [
     Tool(
         name="rag_search",
@@ -81,7 +79,6 @@ def responder_pergunta(pergunta: str) -> str:
         print(f"Ocorreu um erro ao executar o agente: {e}")
         return f"Erro ao gerar resposta: {e}"
 
-# Teste rápido
 if __name__ == "__main__":
     while True:
         user_input = input("Você: ")
