@@ -1,54 +1,59 @@
-from dotenv import load_dotenv
+from langchain_google_genai import GoogleGenerativeAIEmbeddings
+from langchain.vectorstores import FAISS
 import os
+from langchain.document_loaders import TextLoader
+from dotenv import load_dotenv
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import google.generativeai as genai
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import initialize_agent, AgentType
 from langchain.memory import ConversationBufferMemory
 from langchain.tools import Tool
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain.chains import RetrievalQA
+
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=api_key)
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=api_key)
+def import_docs():
+    # Carregar embeddings do Gemini
+    embeddings = GoogleGenerativeAIEmbeddings(
+        google_api_key=api_key,
+        model="models/embedding-001"
+        )
 
-# Carregar índice salvo
-embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-base")
-vectordb = Chroma(persist_directory="./chroma_index", embedding_function=embeddings)
+    def carregar_documentos(pasta):
+        docs = []
+        for nome in os.listdir(pasta):
+            if nome.endswith(".txt") or nome.endswith(".md"):
+                caminho = os.path.join(pasta, nome)
+                loader = TextLoader(caminho, encoding="utf-8")
+                docs.extend(loader.load())
+        return docs
 
-# Criar o retriever para buscar documentos relevantes
-retriever = vectordb.as_retriever(search_kwargs={"k": 3})
+    documentos = carregar_documentos("knowledge")
 
-def ler_arquivo(entrada: str) -> str:
-    try:
-        with open("../knowledge/anya_lore.md", "r", encoding="utf-8") as f:
-            return f.read()
-    except Exception as e:
-        return f"Erro ao ler arquivo: {e}"
+    splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=50)
+    docs_divididos = splitter.split_documents(documentos)
 
-# Função RAG: busca documentos relevantes no índice
-def rag_search(query: str) -> str:
-    docs = retriever.get_relevant_documents(query)
-    if not docs:
-        return "Não encontrei informações relevantes nos documentos."
-    # Concatenar os textos dos documentos para contexto
-    return "\n\n".join([doc.page_content for doc in docs])
+    db = FAISS.from_documents(docs_divididos, embeddings)
+    return db
 
-# Ferramentas que o agente pode usar
-tools = [
-    Tool(
-        name="rag_search",
-        func=rag_search,
-        description="Busca informações relevantes em documentos para ajudar a responder."
-    ),
-    Tool(
-        name="ler_arquivo",
-        func=ler_arquivo,
-        description="Lê o conteúdo do arquivo 'anya_lore.md' para análise de IA."
-    )
-]
+db = import_docs()
+
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    temperature=0.5,
+    google_api_key=api_key
+)
+
+rag_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    retriever=db.as_retriever(),
+    return_source_documents=True
+)
+
 
 system_prompt = """Você é a personagem Anya Forger de Spy x Family e está, cronologicamente,
 vivendo o Arco do Cruzeiro, quando embarcou com seus pais adotivos em um navio de luxo,
@@ -61,6 +66,14 @@ Use seus maneirismos de fala de acordo com sua idade e seus vícios de linguagem
 
 memory = ConversationBufferMemory(memory_key="chat_history")
 
+tools = [
+    Tool(
+        name="rag_search",
+        func=rag_chain.run,
+        description="Busca informações nos documentos importados usando RAG"
+    )
+]
+
 agent = initialize_agent(
     llm=llm,
     tools=tools,
@@ -69,6 +82,8 @@ agent = initialize_agent(
     verbose=True,
     system_message=system_prompt
 )
+
+
 
 def responder_pergunta(pergunta: str) -> str:
     try:
